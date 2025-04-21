@@ -87,33 +87,34 @@ app.post("/signin", (req, res) => {
 });
 
 
-app.get("/me", (req, res) => {
+function auth(req, res, next) {
     const token = req.headers.token;
-    const userDetails = jwt.verify(token, JWT_SECRET); // Verify the token using JWT
-    const decodedToken = jwt.decode(token, JWT_SECRET); // Decode the token using JWT
-    console.log(decodedToken);
-    console.log(userDetails);
-    const username =  userDetails.username;
-    const user = users.find(user => user.username === username);
 
-    // for(let i=0; i < users.length; i++){
-    //     if(users[i].token === token){
-    //         user = users[i];
-    //         break;
-    //     }
-    // }
-
-    if (user) {
-        res.send({
-            username: user.username
+    if (token) {
+        jwt.verify(token, JWT_SECRET, (err, decoded) => {
+            if (err) {
+                res.status(401).send({
+                    message: "Unauthorized"
+                })
+            } else {
+                req.user = decoded;
+                next();
+            }
         })
     } else {
         res.status(401).send({
             message: "Unauthorized"
         })
     }
-});
+}
 
+app.get("/me", auth, (req, res) => {
+    const user = req.user;
+
+    res.send({
+        username: user.username
+    })
+})
 
 
 app.listen(3000, () => {
