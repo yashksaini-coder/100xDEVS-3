@@ -1,9 +1,10 @@
 const express= require('express');
 const app = express();
-
+const jwt = require('jsonwebtoken');
 app.use(express.json());
 
 const users = [];
+const JWT_SECRET = "USER_APP";
 
 app.get('/', (req, res) => {
   res.send('Welcome to the Express Authentication Example!');
@@ -11,15 +12,15 @@ app.get('/', (req, res) => {
 
 // function to generate a random token
 // This function generates a random token of length 32 using characters from a specified set.
-function generateToken() {
-    let options = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+// function generateToken() {
+//     let options = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
-    let token = "";
-    for (let i = 0; i < 32; i++) {
-        token += options[Math.floor(Math.random() * options.length)];
-    }
-    return token;
-}
+//     let token = "";
+//     for (let i = 0; i < 32; i++) {
+//         token += options[Math.floor(Math.random() * options.length)];
+//     }
+//     return token;
+// }
 
 // Signup route, where users can create an account
 // This route handles user signup by accepting a username and password, storing them in an array, and returning a success message.
@@ -64,7 +65,11 @@ app.post("/signin", (req, res) => {
     }
 
     if(foundUser) {
-        const token = generateToken();
+        const token = jwt.sign({    // using jwt to create token 
+            username: foundUser.username
+        }, JWT_SECRET);
+
+
         foundUser.token = token; // Store the token in the user object
         res.json({
             message: "User signed in successfully",
@@ -84,14 +89,19 @@ app.post("/signin", (req, res) => {
 
 app.get("/me", (req, res) => {
     const token = req.headers.token;
-    let user = null;
-    
-    for(let i=0; i < users.length; i++){
-        if(users[i].token === token){
-            user = users[i];
-            break;
-        }
-    }
+    const userDetails = jwt.verify(token, JWT_SECRET); // Verify the token using JWT
+    const decodedToken = jwt.decode(token, JWT_SECRET); // Decode the token using JWT
+    console.log(decodedToken);
+    console.log(userDetails);
+    const username =  userDetails.username;
+    const user = users.find(user => user.username === username);
+
+    // for(let i=0; i < users.length; i++){
+    //     if(users[i].token === token){
+    //         user = users[i];
+    //         break;
+    //     }
+    // }
 
     if (user) {
         res.send({
