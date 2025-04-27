@@ -1,63 +1,41 @@
 const express = require("express");
 const app = express();
+
+// connecting to the database
+const mongoose = require("mongoose");
+mongoose.connect("mongodb+srv://admin:root@cluster0.7kmvq.mongodb.net")
+
+// importing the models from db.js
+const { user, todo } = require("./db.js");
+const JWT_SECRET = "c2VjcmV0Cg=="; // Base64 encoded string of "secret"
+
+
 app.use(express.json());
 
-
-let users = [];
-let todos = [];
-
-
-app.post("/signup", function(req, res) {
+app.post("/signup", async function(req, res) {
     const username = req.body.username;
     const password = req.body.password;
-    users.push({ 
+    const email = req.body.email;
+
+    await user.create({
         username: username,
-        password: password
+        password: password,
+        email: email
     });
 
     res.json({
         message: "User created successfully",
         user: {
             username: username,
-            password: password
+            password: password,
+            email: email
         }
     });
-
-    if (!res.status(200)) {
-        // Here you would typically save the user to a database
-        res.json({ message: "Username and password are required" });
-    } else {
-        res.json({ message: "User created successfully" });
-    }
-
 });
 
 app.post("/signin", function(req, res) {
     const username = req.body.username;
     const password = req.body.password;
-    
-    for(let i=0; i<users.length; i++){
-        if(users[i].username === username && users[i].password === password){
-            foundUser = users[i];
-            break;
-        }
-    }
-    
-        if(foundUser) { // Store the token in the user object
-            res.json({
-                message: "User signed in successfully",
-                user: {
-                    username: foundUser.username,
-                    password: foundUser.password
-                }
-            });
-        } 
-        else {
-            res.status(401).json({
-                message: "Invalid username or password"
-            });
-            console.log("Invalid username or password");
-        }
 });
 
 app.post("/todo", function(req, res) { 
