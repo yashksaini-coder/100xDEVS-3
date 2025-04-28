@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const auth = require("./auth.js").auth; // Importing the auth middleware
 const mongoose = require("mongoose");
 const {user, todo} = require("./db.js");
-
+const bcrypt = require("bcrypt"); // Importing bcrypt for password hashing
 const app = express();
 
 // connecting to the database
@@ -18,9 +18,11 @@ app.post("/signup", async function(req, res) {
     const password = req.body.password;
     const email = req.body.email;
 
+    const hashed = await bcrypt.hash(password, 10); // Hashing the password with bcrypt
+
     await user.create({
         username: username,
-        password: password,
+        password: hashed,
         email: email
     });
 
@@ -39,25 +41,26 @@ app.post("/signin", async function(req, res) {
     const password = req.body.password;
 
     const foundUser = await user.findOne({
-        email: email,
-        password: password
+        email: email
     });
 
     console.log(foundUser);
     // If the user is found, create a JWT token and send it back to the client
 
-    if(foundUser) {
+    const passwordMatch = bcrypt.compare(password, user.password);
+    
+    if (user && passwordMatch) {
         const token = jwt.sign({
-            id: foundUser._id.toString(),
+            id: user._id.toString()
         }, JWT_SECRET);
+
         res.json({
-            message: "User signed in successfully",
-            token: token
-        });
+            token
+        })
     } else {
-        res.status(401).json({
-            message: "Invalid username or password"
-        });
+        res.status(403).json({
+            message: "Incorrect creds"
+        })
     }
 });
 

@@ -12,7 +12,8 @@ const user = new schema({
 const todo = new schema({
     title: String,
     description: String,
-    userId: object,    
+    userId: object,
+    timestamp: {type: Date, default: Date.now}, // Automatically set the timestamp to the current date and time when a new todo is created    
 });
 
 module.exports = {
