@@ -40,18 +40,28 @@ app.post("/signin", async function(req, res) {
     const email = req.body.email;
     const password = req.body.password;
 
+
     const foundUser = await user.findOne({
         email: email
     });
 
+
+    // Basically we are checking if the user exists in the database or not, and if they do, we are taking the  password and checking if it matches the password in the database or not,
+    // by using bcrypt.compare, which compares the hashed password in the database with the password entered by the user.
+    if (!foundUser) {
+        return res.status(403).json({
+            message: "User not found"
+        });
+    }
+
     console.log(foundUser);
     // If the user is found, create a JWT token and send it back to the client
 
-    const passwordMatch = bcrypt.compare(password, user.password);
-    
-    if (user && passwordMatch) {
+    const passwordMatch = await bcrypt.compare(password, foundUser.password);
+
+    if (passwordMatch) {
         const token = jwt.sign({
-            id: user._id.toString()
+            id: foundUser._id.toString()
         }, JWT_SECRET);
 
         res.json({
