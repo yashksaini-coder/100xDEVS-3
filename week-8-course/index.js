@@ -47,8 +47,6 @@ app.post('/signup', async (req, res) => {
         email: email
     });
 
-    // You can also create a JWT token for the user here if needed
-    // const token = jwt.sign({email: email}, JWT_SECRET, {expiresIn: '1h'}); // Example of creating a JWT token
     res.json({
         message: "User created successfully",
         user: {
@@ -59,11 +57,37 @@ app.post('/signup', async (req, res) => {
     });
 });
 
-// app.post('login', async(req,res) =>{
-//     const {email, password} = req.body;
+app.post('/login', async(req,res) =>{
+    const {email, password} = req.body;
+    // Check if the email and password are provided
+    if(!email || !password){
+      return res.status(400).json({message: "Please provide username, password, and email"});
+    }
 
-//     await user.
-// })
+    const foundUser = await user.findOne({
+      email: email
+    })
+    
+    if(!foundUser){
+      return res.status(400).json({message: "User not found"});
+    }
+
+    console.log(foundUser);
+
+    const passwordMatch = await bcrypt.compare(password, foundUser.password);
+
+    if(passwordMatch){
+      const token = jwt.sign({
+        id: foundUser._id.toString()
+      }, JWT_SECRET);
+
+      res.json({
+        token
+      })
+    } else {
+      res.status(400).json({message:"Incorret credentials"})
+    }
+})
 
 
 app.listen(3000, () => {
