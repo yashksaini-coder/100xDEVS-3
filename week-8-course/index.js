@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const app = express();
-
+import {user, admin, courses, purchase} from './db.js';
 // connecting to the database
 mongoose.connect("mongodb+srv://admin:root@main.cqd4hyx.mongodb.net/courses").then(() => {
   console.log("Connected to MongoDB successfully");
