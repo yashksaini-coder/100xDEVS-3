@@ -17,15 +17,15 @@ const courses = new schema({
     image: String,
 });
 
-const admin = new Schema({
+const admin = new schema({
     username: String,
     email: {type: String, unique: true}, // Ensure email is unique, so that no two users can have the same email address
     password: String,
 })
 
-const purchase = new Schema({
-    userId: ObjectId,
-    courseId: ObjectId
+const purchase = new schema({
+    userId: object,
+    courseId: object
 });
 
 module.exports = {

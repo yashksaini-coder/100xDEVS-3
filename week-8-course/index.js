@@ -1,7 +1,15 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const app = express();
-import {user, admin, courses, purchase} from './db.js';
+const {user, admin, courses, purchase} = require('./db.js');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken'); // Importing jsonwebtoken for JWT token generation and verification
+
+
+const JWT_SECRET = "c2VjcmV0Cg=="; // Base64 encoded string of secret
+app.use(express.json()); // Middleware to parse JSON request bodies
+
+
 // connecting to the database
 mongoose.connect("mongodb+srv://admin:root@main.cqd4hyx.mongodb.net/courses").then(() => {
   console.log("Connected to MongoDB successfully");
