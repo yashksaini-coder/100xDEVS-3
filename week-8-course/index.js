@@ -1,13 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const app = express();
-const {user, admin, courses, purchase} = require('./db.js');
-
-
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken'); // Importing jsonwebtoken for JWT token generation and verification
-const {userRouter} = require('./routes/user.js');
-
+const { userRouter } = require('./routes/user.js');
+const { courseRouter } = require('./routes/course.js');
 app.use(express.json()); // Middleware to parse JSON request bodies
 
 
@@ -18,11 +13,16 @@ mongoose.connect("mongodb+srv://admin:root@main.cqd4hyx.mongodb.net/courses").th
   console.error("Error connecting to MongoDB:", err);
 });
 
-app.get('/', (req, res) => {
+app.get('/api/v1', (req, res) => {
   res.send('Welcome to the Course Selling application!');
 });
 
 app.use(userRouter)
+app.use(courseRouter)
+
+app.use('/api/v1/user', userRouter)
+app.use('/api/v1/course', courseRouter)
+
 
 app.listen(3000, () => {
   console.log('Server is running on port 3000');
