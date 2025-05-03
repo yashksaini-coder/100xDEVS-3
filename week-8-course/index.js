@@ -4,8 +4,10 @@ const app = express();
 const { userRouter } = require('./routes/user.js');
 const { courseRouter } = require('./routes/course.js');
 const { adminRouter } = require('./routes/admin.js');
-app.use(express.json()); // Middleware to parse JSON request bodies
+const { auth } = require('./middleware.js');
 
+app.use(express.json()); // Middleware to parse JSON request bodies
+app.use( auth );
 
 // connecting to the database
 mongoose.connect("mongodb+srv://admin:root@main.cqd4hyx.mongodb.net/courses").then(() => {
