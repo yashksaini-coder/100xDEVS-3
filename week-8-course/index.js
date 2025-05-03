@@ -2,11 +2,12 @@ const express = require('express');
 const mongoose = require('mongoose');
 const app = express();
 const {user, admin, courses, purchase} = require('./db.js');
+
+
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken'); // Importing jsonwebtoken for JWT token generation and verification
-const {userRoutes} = require('./routes/user.js');
+const {userRouter} = require('./routes/user.js');
 
-const JWT_SECRET = "c2VjcmV0Cg=="; // Base64 encoded string of secret
 app.use(express.json()); // Middleware to parse JSON request bodies
 
 
@@ -21,7 +22,7 @@ app.get('/', (req, res) => {
   res.send('Welcome to the Course Selling application!');
 });
 
-app.use(userRoutes)
+app.use(userRouter)
 
 app.listen(3000, () => {
   console.log('Server is running on port 3000');
