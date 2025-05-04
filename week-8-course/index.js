@@ -1,3 +1,5 @@
+require('dotenv').config()
+// console.log(process.env.DB_URL)
 const express = require('express');
 const mongoose = require('mongoose');
 const app = express();
@@ -19,7 +21,7 @@ app.use('/api/v1/admin', adminRouter)
 
 async function main() {
   // connecting to the database
-  mongoose.connect("mongodb+srv://admin:root@main.cqd4hyx.mongodb.net/courses").then(() => {
+  mongoose.connect(process.env.DB_URL).then(() => {
     console.log("Connected to MongoDB successfully");
   }).catch((err) => {
     console.error("Error connecting to MongoDB:", err);
