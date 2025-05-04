@@ -1,5 +1,5 @@
 const { Router } = require('express');
-const {user} = require('../db.js');
+const {admin} = require('../db.js');
 const {JWT_SECRET} = require('../config.js');
 const bcrypt = require("bcrypt"); // Importing bcrypt for password hashing
 const jwt = require('jsonwebtoken');
@@ -18,28 +18,28 @@ adminRouter.post('/signup', async (req, res) => {
   try {
     // Check if the username and email are provided
     if (!username || !password || !email) {
-      return res.status(400).json({ message: "Please provide username, password, and email" });
+      return res.status(400).json({ message: "Please provide name, password, and email" });
     }
 
     // You can also add email validation and other checks here
     // For example, check if the email already exists in the database
-    if (await user.findOne({ email: email })) {
+    if (await admin.findOne({ email: email })) {
       return res.status(400).json({ message: "Email already exists" });
     }
-    if (await user.findOne({ username: username })) {
+    if (await admin.findOne({ username: username })) {
       return res.status(400).json({ message: "Username already exists" });
     }
 
-    // If the email and username are unique, create the user
-    await user.create({
+    // If the email and username are unique, create the admin
+    await admin.create({
       username: username,
       password: hashedPassword,
       email: email
     });
 
     res.json({
-      message: "User created successfully",
-      user: {
+      message: "admin created successfully",
+      admin: {
         username: username,
         password: password,
         email: email
@@ -59,12 +59,12 @@ adminRouter.post('/login', async (req, res) => {
       return res.status(400).json({ message: "Please provide username, password, and email" });
     }
 
-    const foundUser = await user.findOne({
+    const foundUser = await admin.findOne({
       email: email
     })
 
     if (!foundUser) {
-      return res.status(400).json({ message: "User not found" });
+      return res.status(400).json({ message: "admin not found" });
     }
 
     console.log(foundUser);
