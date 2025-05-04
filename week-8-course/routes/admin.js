@@ -1,15 +1,11 @@
 const { Router } = require('express');
-const {admin} = require('../db.js');
-const {JWT_SECRET} = require('../config.js');
+const {admin, courseModel} = require('../db.js');
+const {JWT_ADMIN} = require('../config.js');
 const bcrypt = require("bcrypt"); // Importing bcrypt for password hashing
 const jwt = require('jsonwebtoken');
+const { adminMiddleware } = require('../middleware/admin.js');
 
 const adminRouter = Router();
-
-
-adminRouter.get('/all', (req, res) => {
-    return res.status(200).json({ message: "All courses are present here!" })
-})
 
 adminRouter.post('/signup', async (req, res) => {
   const { username, password, email } = req.body;
@@ -23,14 +19,14 @@ adminRouter.post('/signup', async (req, res) => {
 
     // You can also add email validation and other checks here
     // For example, check if the email already exists in the database
-    if (await admin.findOne({ email: email })) {
+    if (await adminUser.findOne({ email: email })) {
       return res.status(403).json({ message: "Email already exists" });
     }
-    if (await admin.findOne({ username: username })) {
+    if (await adminUser.findOne({ username: username })) {
       return res.status(403).json({ message: "Username already exists" });
     }
 
-    // If the email and username are unique, create the admin
+    // If the email and username are unique, create the adminUser
     await admin.create({
       username: username,
       password: hashedPassword,
@@ -38,8 +34,8 @@ adminRouter.post('/signup', async (req, res) => {
     });
 
     res.json({
-      message: "admin created successfully",
-      admin: {
+      message: "adminUser created successfully",
+      adminUser: {
         username: username,
         password: password,
         email: email
@@ -59,22 +55,22 @@ adminRouter.post('/login', async (req, res) => {
       return res.status(400).json({ message: "Please provide username, password, and email" });
     }
 
-    const foundUser = await admin.findOne({
+    const adminUser = await admin.findOne({
       email: email
     })
 
-    if (!foundUser) {
-      return res.status(400).json({ message: "admin not found" });
+    if (!adminUser) {
+      return res.status(400).json({ message: "adminUser not found" });
     }
 
-    console.log(foundUser);
+    console.log(adminUser);
 
-    const passwordMatch = await bcrypt.compare(password, foundUser.password);
+    const passwordMatch = await bcrypt.compare(password, adminUser.password);
 
     if (passwordMatch) {
       const token = jwt.sign({
-        id: foundUser._id.toString()
-      }, JWT_SECRET);
+        id: adminUser._id.toString()
+      }, JWT_ADMIN);
 
       res.json({
         token
@@ -83,20 +79,26 @@ adminRouter.post('/login', async (req, res) => {
       res.status(400).json({ message: "Incorret credentials" })
     }
   } catch (error) {
-    res.status(500).json({ message: "An error occured" + error })
+    res.status(500).json({ message: "An error occured " + error })
   }
 });
 
-adminRouter.post('/course', (req, res) =>{
+//creating a course
+adminRouter.post('/create-course', adminMiddleware, async (req, res) =>{
   try {
-    // firstly check if it exists or not
-
     // TODO: to create and publish a course
-    const const_data = req.body;
+    const adminId = req.userId;
+    const {title, description, price, image} = req.body;
 
-    // code logic to create a course { const course  = course.create({course data})}
+    const course  = await courseModel.create({
+      title: title, 
+      description: description, 
+      image: image, 
+      price: price, 
+      creatorId: adminId
+    })
 
-    res.status(200).json({message:"Course created successfully", course})
+    res.status(200).json({message:"Course created successfully"}, course);
   } catch (error) {
     res.status(500).json({message:" An error occured "+error})
   }
@@ -104,7 +106,7 @@ adminRouter.post('/course', (req, res) =>{
 
 
 //to update a course
-adminRouter.put('/course', (req, res) =>{
+adminRouter.put('/course', adminMiddleware, (req, res) =>{
   try {
     // firstly check if it exists or not
 
@@ -119,6 +121,18 @@ adminRouter.put('/course', (req, res) =>{
   }
 })
 
+adminRouter.get("/course/bulk", adminMiddleware,async function(req, res) {
+  const adminId = req.userId;
+
+  const courses = await courseModel.find({
+      creatorId: adminId 
+  });
+
+  res.json({
+      message: "Course updated",
+      courses
+  })
+})
 
 module.exports = {
     adminRouter: adminRouter

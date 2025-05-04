@@ -1,22 +1,28 @@
 const { Router } = require('express');
 const courseRouter = Router();
-const { auth } = require('../middleware');
+const { purchase, courseModel} = require('../db.js');
+const { userMiddleware } = require('../middleware/user');
 
 
-courseRouter.get('/all', auth, (req, res) => {
-    return res.status(200).json({ message: "All courses are present here!" })
+courseRouter.get('/all', async (req, res) => {
+    const allCourses = await courseModel.find({});
+    return res.status(200).json({ message: "All courses are present here!", allCourses })
 })
 
-courseRouter.post('/purchase', (req,res) =>{
-    //purchase a course using details of userID and courseID
+//purchase a course using details of userID and courseID
+courseRouter.post('/purchase', userMiddleware, async (req,res) =>{
     
+    const userId = req.userId;
+    const courseId = req.body.courseId;
     //add many other checks too also properly handle requests and return 400 status
     try {
-        // await course.find({courseID});
+        await purchase.create({
+            userId,
+            courseId
+        })
 
-        //some logic to assign access to the user with userID
+        res.status(200).json({message:"You have bought the course successfully"})
 
-        //update the db to assign access
     } catch (error) {
         res.status(500).json({message:"An error occured " + error});        
     }
@@ -26,7 +32,6 @@ courseRouter.get('/preview', (req, res) => {
     //get a particular course details
 
     try {
-        //add many other checks too also properly handle requests and return 400 status
 
         // await courseRouter.find({courseID})
         const course = {
