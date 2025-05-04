@@ -1,8 +1,9 @@
 const { Router } = require('express');
-const {user, purchase} = require('../db.js');
+const {user, purchase, courseModel} = require('../db.js');
 const {JWT_SECRET} = require('../config.js');
 const bcrypt = require("bcrypt"); // Importing bcrypt for password hashing
 const jwt = require('jsonwebtoken');
+const { userMiddleware } = require('../middleware/user');
 
 const userRouter = Router()
 
@@ -81,6 +82,29 @@ userRouter.post('/login', async (req, res) => {
     res.status(500).json({ message: "An error occured" + error })
   }
 });
+
+userRouter.get("/purchases", userMiddleware, async function(req, res) {
+  const userId = req.userId;
+
+  const purchases = await purchase.find({
+      userId,
+  });
+
+  let purchasedCourseIds = [];
+
+  for (let i = 0; i<purchases.length;i++){ 
+      purchasedCourseIds.push(purchases[i].courseId)
+  }
+
+  const coursesData = await courseModel.find({
+      _id: { $in: purchasedCourseIds }
+  })
+
+  res.json({
+      purchases,
+      coursesData
+  })
+})
 
 
 module.exports = {

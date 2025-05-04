@@ -21,7 +21,7 @@ courseRouter.post('/purchase', userMiddleware, async (req,res) =>{
             courseId
         })
 
-        res.status(200).json({message:"You have bought the course successfully"})
+        res.status(200).json({message:"You have bought the course successfully",courseId:courseId})
 
     } catch (error) {
         res.status(500).json({message:"An error occured " + error});        
