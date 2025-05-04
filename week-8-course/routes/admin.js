@@ -19,10 +19,10 @@ adminRouter.post('/signup', async (req, res) => {
 
     // You can also add email validation and other checks here
     // For example, check if the email already exists in the database
-    if (await adminUser.findOne({ email: email })) {
+    if (await admin.findOne({ email: email })) {
       return res.status(403).json({ message: "Email already exists" });
     }
-    if (await adminUser.findOne({ username: username })) {
+    if (await admin.findOne({ username: username })) {
       return res.status(403).json({ message: "Username already exists" });
     }
 
@@ -129,7 +129,7 @@ adminRouter.put("/update-course", adminMiddleware, async function(req, res) {
   })
 })
 
-adminRouter.get("/course/bulk", adminMiddleware, async function (req, res) {
+adminRouter.get("/bulk", adminMiddleware, async function (req, res) {
   const adminId = req.userId;
 
   const courses = await courseModel.find({
@@ -137,7 +137,7 @@ adminRouter.get("/course/bulk", adminMiddleware, async function (req, res) {
   });
 
   res.json({
-    message: "Course updated",
+    message: "All courses of this admin are",
     courses
   })
 })
