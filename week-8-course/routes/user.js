@@ -19,10 +19,10 @@ userRouter.post('/signup', async (req, res) => {
     // You can also add email validation and other checks here
     // For example, check if the email already exists in the database
     if (await user.findOne({ email: email })) {
-      return res.status(400).json({ message: "Email already exists" });
+      return res.status(403).json({ message: "Email already exists" });
     }
     if (await user.findOne({ username: username })) {
-      return res.status(400).json({ message: "Username already exists" });
+      return res.status(403).json({ message: "Username already exists" });
     }
 
     // If the email and username are unique, create the user

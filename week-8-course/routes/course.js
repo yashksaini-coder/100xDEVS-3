@@ -1,8 +1,9 @@
 const { Router } = require('express');
 const courseRouter = Router();
+const { auth } = require('../middleware');
 
 
-courseRouter.get('/all', (req, res) => {
+courseRouter.get('/all', auth, (req, res) => {
     return res.status(200).json({ message: "All courses are present here!" })
 })
 
