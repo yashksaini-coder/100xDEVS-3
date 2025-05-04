@@ -1,6 +1,6 @@
 const { Router } = require('express');
-const {admin, courseModel} = require('../db.js');
-const {JWT_ADMIN} = require('../config.js');
+const { admin, courseModel } = require('../db.js');
+const { JWT_ADMIN } = require('../config.js');
 const bcrypt = require("bcrypt"); // Importing bcrypt for password hashing
 const jwt = require('jsonwebtoken');
 const { adminMiddleware } = require('../middleware/admin.js');
@@ -84,56 +84,64 @@ adminRouter.post('/login', async (req, res) => {
 });
 
 //creating a course
-adminRouter.post('/create-course', adminMiddleware, async (req, res) =>{
+adminRouter.post('/create-course', adminMiddleware, async (req, res) => {
+
   try {
     // TODO: to create and publish a course
     const adminId = req.userId;
-    const {title, description, price, image} = req.body;
+    const { title, description, price, image } = req.body;
 
-    const course  = await courseModel.create({
-      title: title, 
-      description: description, 
-      image: image, 
-      price: price, 
+    const course = await courseModel.create({
+      title: title,
+      description: description,
+      image: image,
+      price: price,
       creatorId: adminId
     })
 
-    res.status(200).json({message:"Course created successfully"}, course);
+    res.status(200).json({ message: "Course created successfully", data: course });
   } catch (error) {
-    res.status(500).json({message:" An error occured "+error})
+    res.status(500).json({ message: " An error occured " + error })
   }
 })
 
 
 //to update a course
-adminRouter.put('/course', adminMiddleware, (req, res) =>{
-  try {
-    // firstly check if it exists or not
-
-    // TODO: to create and publish a course
-    const const_data = req.body;
-
-    // code logic to create a course { const course  = course.create({course data})}
-
-    res.status(200).json({message:"Course created successfully", course})
-  } catch (error) {
-    res.status(500).json({message:" An error occured "+error})
-  }
-})
-
-adminRouter.get("/course/bulk", adminMiddleware,async function(req, res) {
+adminRouter.put("/update-course", adminMiddleware, async function(req, res) {
   const adminId = req.userId;
 
-  const courses = await courseModel.find({
+  const { title, description, imageUrl, price, courseId } = req.body;
+
+  // creating a web3 saas in 6 hours
+  const course = await courseModel.findOneAndUpdate({
+      _id: courseId, 
       creatorId: adminId 
-  });
+  }, {
+      title: title, 
+      description: description, 
+      imageUrl: imageUrl, 
+      price: price
+  })
 
   res.json({
       message: "Course updated",
-      courses
+      courseId: course._id.toString()
+  })
+})
+
+adminRouter.get("/course/bulk", adminMiddleware, async function (req, res) {
+  const adminId = req.userId;
+
+  const courses = await courseModel.find({
+    creatorId: adminId
+  });
+
+  res.json({
+    message: "Course updated",
+    courses
   })
 })
 
 module.exports = {
-    adminRouter: adminRouter
+  adminRouter: adminRouter
 }
