@@ -30,7 +30,7 @@ const purchase = new schema({
 
 module.exports = {
     user: mongoose.model('user', user),
-    todo: mongoose.model('courses', courses),
+    courseModel: mongoose.model('courses', courses),
     purchase: mongoose.model('purchase', purchase),
     admin: mongoose.model('admin', admin)
 };
